@@ -1,7 +1,9 @@
 {
+    "description": "Modified by BW-Tech GmbH for owncloud.online PHP 8.4 compatibility.",
+    "modified-by": "BW-Tech GmbH",
     "config" : {
         "platform": {
-            "php": "7.4"
+            "php": "8.4"
         }
     },
     "require": {

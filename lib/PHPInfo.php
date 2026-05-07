@@ -3,6 +3,7 @@
  * @author Thomas Müller <thomas.mueller@tmit.eu>
  *
  * @copyright Copyright (c) 2024, ownCloud GmbH
+ * Modified by BW-Tech GmbH for owncloud.online PHP 8.4 compatibility.
  * @license AGPL-3.0
  *
  * This code is free software: you can redistribute it and/or modify
@@ -108,7 +109,7 @@ class PHPInfo {
 				}
 				if (!isset($match[3])) {
 					$value = $match[2] ?? null;
-				} elseif ($match[2] == $match[3]) {
+				} elseif ($match[2] === $match[3]) {
 					$value = $match[2];
 				} else {
 					$value = \array_slice($match, 2);
@@ -162,7 +163,7 @@ class PHPInfo {
 				# Each extension block starts with the name of the extension. And if the current line is such a line, then we
 				#   need to start a new block, but before that, we need to process the currentBlock and assign its results
 				#   to the currentKey
-				if ($currentKey != null) {
+				if ($currentKey !== null) {
 					$settings[$currentKey] = $currentBlock;
 				}
 				$currentKey = $line;
@@ -171,11 +172,11 @@ class PHPInfo {
 
 			# If the currentKey is not null, then we are in an extension block, and so this line gets added to the currentBlock
 			#   currentKey would be null when this foreach loop starts, and until the first extension block is encountered
-			if ($currentKey != null) {
+			if ($currentKey !== null) {
 				$currentBlock[] = $line;
 			}
 		}
-		if ($currentKey != null) {
+		if ($currentKey !== null) {
 			$settings[$currentKey] = $currentBlock;
 		}
 		return $settings;
