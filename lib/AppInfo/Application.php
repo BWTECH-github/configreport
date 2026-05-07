@@ -1,4 +1,7 @@
 <?php
+/**
+ * Modified by BW-Tech GmbH for owncloud.online PHP 8.4 compatibility.
+ */
 
 namespace OCA\ConfigReport\AppInfo;
 
@@ -43,16 +46,18 @@ class Application extends App {
 	}
 
 	public static function getCollector(): ReportDataCollector {
+		$statusInfo = \OCP\Util::getStatusInfo(true);
+		$user = \OC::$server->getUserSession()->getUser();
+
 		return new ReportDataCollector(
 			\OC::$server->getIntegrityCodeChecker(),
 			\OC::$server->getUserManager(),
 			new UserTypeHelper(),
 			\OC::$server->getGroupManager(),
-			\OC_Util::getVersion(),
-			\OC_Util::getVersionString(),
-			\OC_Util::getEditionString(),
-			/* @phan-suppress-next-line PhanDeprecatedFunction */
-			\OCP\User::getDisplayName(),
+			\OCP\Util::getVersion(),
+			$statusInfo['versionstring'] ?? '',
+			$statusInfo['edition'] ?? '',
+			$user !== null ? $user->getDisplayName() : '',
 			/* @phan-suppress-next-line PhanAccessMethodInternal */
 			\OC::$server->getSystemConfig(),
 			\OC::$server->getAppConfig(),

@@ -1,4 +1,5 @@
 name: CI
+# Modified by BW-Tech GmbH for owncloud.online PHP 8.4 compatibility.
 
 on:
   push:
@@ -18,8 +19,8 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  APP_NAME: brute_force_protection
-  PHP_VERSIONS: '["8.3"]'
+  APP_NAME: configreport
+  PHP_VERSIONS: '["8.4"]'
 
 jobs:
   get-vars:

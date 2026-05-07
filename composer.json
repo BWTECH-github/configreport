@@ -1,14 +1,19 @@
 {
-  "name": "owncloud/configreport",
+  "name": "bwtech/configreport",
+  "description": "Modified by BW-Tech GmbH for owncloud.online PHP 8.4 compatibility.",
+  "homepage": "https://github.com/GrossLukas/configreport",
+  "license": "AGPL-3.0-only",
+  "modified-by": "BW-Tech GmbH",
   "config" : {
     "platform": {
-      "php": "8.3"
+      "php": "8.4"
     },
     "allow-plugins": {
       "bamarni/composer-bin-plugin": true
     }
   },
   "require": {
+    "php": ">=8.4",
     "ramsey/uuid": "^4.2"
   },
   "require-dev": {
@@ -20,5 +25,9 @@
     "bamarni-bin": {
       "bin-links": false
     }
+  },
+  "support": {
+    "issues": "https://github.com/GrossLukas/configreport/issues",
+    "source": "https://github.com/GrossLukas/configreport"
   }
 }

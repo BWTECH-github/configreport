@@ -1,6 +1,7 @@
 <?php
 /**
  * @copyright Copyright (c) 2016, ownCloud GmbH.
+ * Modified by BW-Tech GmbH for owncloud.online PHP 8.4 compatibility.
  * @license AGPL-3.0
  *
  * This code is free software: you can redistribute it and/or modify
@@ -140,8 +141,8 @@ class ReportDataCollector {
 		$this->displayName = $displayName;
 
 		$this->systemConfig = $systemConfig;
-		$this->apps = \OC_App::listAllApps();
 		$this->appConfig = $appConfig;
+		$this->apps = $this->listAllApps();
 		$this->connection = $connection;
 		$this->globalStoragesService = $globalStoragesService;
 
@@ -368,6 +369,39 @@ class ReportDataCollector {
 		return $values;
 	}
 
+	private function listAllApps(): array {
+		$appManager = \OC::$server->getAppManager();
+		$blacklist = $appManager->getAlwaysEnabledApps();
+		$appList = [];
+
+		foreach ($appManager->getAllApps() as $appId) {
+			if (\array_search($appId, $blacklist, true) !== false) {
+				continue;
+			}
+
+			$info = $appManager->getAppInfo($appId);
+			if (!\is_array($info) || !isset($info['name'])) {
+				continue;
+			}
+
+			$enabled = $this->appConfig->getValue($appId, 'enabled', 'no');
+			$info['id'] = $appId;
+			$info['groups'] = null;
+			if ($enabled === 'yes') {
+				$info['active'] = true;
+			} elseif ($enabled === 'no') {
+				$info['active'] = false;
+			} else {
+				$info['active'] = true;
+				$info['groups'] = $enabled;
+			}
+
+			$appList[] = $info;
+		}
+
+		return $appList;
+	}
+
 	private function getCoreConfigArray(): array {
 		// Get core config data
 		$appConfig = $this->appConfig->getValues('core', false);
@@ -514,7 +548,8 @@ class ReportDataCollector {
 	}
 
 	private function getStorageOverview(): array {
-		$isObjectStore = Filesystem::getStorage('/')->instanceOfStorage(ObjectStoreStorage::class);
+		$rootStorage = Filesystem::getStorage('/');
+		$isObjectStore = $rootStorage !== null && $rootStorage->instanceOfStorage(ObjectStoreStorage::class);
 		$storage = new Storage($this->connection);
 		$usedStorage = $storage->getUsedTotalSpace();
 
