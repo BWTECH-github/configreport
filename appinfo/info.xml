@@ -32,6 +32,6 @@ Modified by BW-Tech GmbH for owncloud.online and PHP 8.4 compatibility.</descrip
 	</background-jobs>
 	<category>tools</category>
 	<documentation>
-		<admin>https://doc.owncloud.com/server/next/admin_manual/troubleshooting/providing_logs_and_config_files.html#generate-a-config-report</admin>
+		<admin>https://github.com/BWTECH-github/configreport#readme</admin>
 	</documentation>
 </info>
