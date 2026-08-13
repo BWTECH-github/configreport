@@ -192,38 +192,6 @@ class ReportDataCollector {
 		return $report;
 	}
 
-	public function getTelemetryReport(string $licenseKey): array {
-		return [
-			'basic' => $this->getBasicDetailArray($licenseKey),
-			'stats' => $this->getStatsDetailArray(),
-			'apps' => $this->getAppsSimplifiedArray(),
-			'shares' => $this->getShareOverview(),
-			'db' => $this->getTableOverview(),
-			'storage' => $this->getStorageOverview(),
-			'config' => $this->getSystemConfigDetailArray(),
-			'mounts' => $this->getMountsSimplified(),
-			'phpinfo' => $this->getPhpInfoDetailArray()
-		];
-	}
-
-	private function getMountsSimplified(): array {
-		/** @var IStorageConfig[] $mounts */
-		$mounts = $this->globalStoragesService->getStorageForAllUsers();
-
-		$mountsArray = [];
-
-		foreach ($mounts as $mount) {
-			if ($mount->getType() === IStorageConfig::MOUNT_TYPE_PERSONAl) {
-				continue;
-			}
-			$mountsArray[] = [
-				'id' => $mount->getId(),
-				'storage' => $mount->getBackend()->getText(),
-				'type' => $mount->getType() === IStorageConfig::MOUNT_TYPE_ADMIN ? 'Admin' : 'Personal'
-			];
-		}
-		return $mountsArray;
-	}
 
 	private function getMountsArray(): array {
 		/** @var IStorageConfig[] $mounts */

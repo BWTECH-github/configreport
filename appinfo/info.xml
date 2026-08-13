@@ -22,14 +22,10 @@ Modified by BW-Tech GmbH for owncloud.online and PHP 8.4 compatibility.</descrip
 	<default_enable/>
 	<commands>
 		<command>OCA\ConfigReport\Command\ConfigReport</command>
-		<command>OCA\ConfigReport\Command\SendTelemetry</command>
 	</commands>
 	<settings>
 		<admin>OCA\ConfigReport\AdminPanel</admin>
 	</settings>
-	<background-jobs>
-		<job>OCA\ConfigReport\Telemetry\BackgroundJob</job>
-	</background-jobs>
 	<category>tools</category>
 	<documentation>
 		<admin>https://github.com/BWTECH-github/configreport#readme</admin>
