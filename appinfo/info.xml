@@ -5,12 +5,75 @@
 	<name>Admin Config Report</name>
 	<namespace>ConfigReport</namespace>
 	<licence>AGPL</licence>
-	<description>Generate a Config Report.
+	<description>
+Produces a snapshot of this instance at the press of a button: version, active
+apps with their versions, database type and table sizes, PHP version and
+extensions, mounted external storages, share and storage totals, and the
+contents of config.php.
 
-Modified by BW-Tech GmbH for owncloud.online and PHP 8.4 compatibility.</description>
+Meant for support cases. Instead of a dozen questions back and forth, one file
+answers them.
+
+**Passwords and secrets are removed**
+
+`passwordsalt`, `secret`, `dbpassword` and the credentials of external storages
+are replaced with a placeholder before the report is written. The report can be
+handed on without handing on access. Read it through anyway: paths, host names
+and account names remain in it.
+
+**Two ways to get it**
+
+In the web interface under Settings, General; or on the command line with
+`occ configreport:generate`. The command line is the more reliable one, because
+it still works when the web interface does not - which is usually when you need
+the report most.
+
+**Difference from the original app**
+
+The version this is based on sent part of these data to a server of the upstream
+vendor once a day, as an opt-out. That channel is removed here. The report is
+created only when you ask for it, and it leaves the server only because you send
+it somewhere.
+
+---
+
+**Deutsch**
+
+Erzeugt auf Knopfdruck eine Momentaufnahme der Instanz: Version, aktive Apps mit
+ihren Versionen, Datenbanktyp und Tabellengroessen, PHP-Version und
+Erweiterungen, eingebundene externe Speicher, Kennzahlen zu Freigaben und
+Speicher sowie den Inhalt der config.php.
+
+Gedacht fuer Support-Faelle. Statt zwoelf Rueckfragen beantwortet eine Datei
+die Fragen.
+
+**Passwoerter und Geheimnisse werden entfernt**
+
+`passwordsalt`, `secret`, `dbpassword` und die Zugangsdaten externer Speicher
+werden durch einen Platzhalter ersetzt, bevor der Bericht entsteht. Er laesst
+sich also weitergeben, ohne Zugaenge mitzugeben. Sehen Sie ihn trotzdem durch:
+Pfade, Hostnamen und Kontonamen bleiben darin stehen.
+
+**Zwei Wege**
+
+In der Weboberflaeche unter Einstellungen, Allgemein - oder auf der
+Kommandozeile mit `occ configreport:generate`. Der Weg ueber die Kommandozeile
+ist der verlaesslichere, weil er auch dann noch geht, wenn die Weboberflaeche
+nicht mehr erreichbar ist. Und das ist meist genau der Moment, in dem man den
+Bericht braucht.
+
+**Unterschied zur urspruenglichen App**
+
+Die Vorlage schickte einen Teil dieser Daten einmal taeglich an einen Server des
+Ursprungsanbieters, und zwar als Opt-out. Dieser Kanal ist hier entfernt. Der
+Bericht entsteht nur auf Anforderung und verlaesst den Server nur dadurch, dass
+Sie ihn weitergeben.
+
+Modified by BW-Tech GmbH for owncloud.online and PHP 8.4 compatibility.
+</description>
 	<summary>Generate a Config Report</summary>
 	<author>ownCloud contributors, modified by BW-Tech GmbH</author>
-	<version>0.4.1</version>
+	<version>0.4.2</version>
 	<default_enable/>
 	<types>
 		<filesystem/>

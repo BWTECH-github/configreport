@@ -4,6 +4,13 @@ All notable changes to this app will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
+## [0.4.2] - 2026-08-13
+
+### Changed
+
+- Marktbeschreibung neu, deutsch und englisch, samt Hinweis auf die entfernte
+  Telemetrie und darauf, was der Bericht schwaerzt.
+
 ## [0.4.1] - 2026-08-13
 
 ### Changed
