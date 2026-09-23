@@ -4,6 +4,12 @@ All notable changes to this app will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
+## [0.4.4] - 2026-09-23
+
+### Security
+
+- Geheimnisse werden auch verschachtelt (z. B. redis.cluster → password, objectstore → credentials) und in JSON-Zeichenketten von App-Werten geschwärzt; vorher nur auf der obersten Ebene. Numerische Listenschlüssel gelten nie als Geheimnis. Vier neue Tests.
+
 ## [0.4.3] - 2026-09-23
 
 ### Fixed
