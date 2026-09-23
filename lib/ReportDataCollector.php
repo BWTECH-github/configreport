@@ -327,8 +327,25 @@ class ReportDataCollector {
 	 */
 	private function sanitizeValues(array $values): array {
 		foreach ($values as $key => $value) {
-			if (self::isSensitiveKey((string)$key) || \in_array($key, $this->obscuredkeys, true)) {
+			// Numerische Schlüssel (Listen) nie als Geheimnis werten - „0“ ist
+			// kein Name. Verschachtelte Werte rekursiv: Geheimnisse stehen oft
+			// unter unauffälligen Schlüsseln wie 'redis.cluster' => ['password']
+			// oder 'objectstore_multibucket' => [...'credentials' => ...], die
+			// die Kernliste SystemConfig::$sensitiveValues nicht kennt
+			// (Gegen-Review 23.09.2026).
+			if (\is_string($key) && (self::isSensitiveKey($key) || \in_array($key, $this->obscuredkeys, true))) {
 				$values[$key] = IConfig::SENSITIVE_VALUE;
+			} elseif (\is_array($value)) {
+				$values[$key] = $this->sanitizeValues($value);
+			} elseif (\is_string($value) && $value !== '' && ($value[0] === '{' || $value[0] === '[')) {
+				// App-Werte speichern Strukturen oft als JSON-Zeichenkette.
+				$dekodiert = \json_decode($value, true);
+				if (\is_array($dekodiert)) {
+					$bereinigt = $this->sanitizeValues($dekodiert);
+					if ($bereinigt !== $dekodiert) {
+						$values[$key] = \json_encode($bereinigt, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+					}
+				}
 			}
 		}
 		return $values;
