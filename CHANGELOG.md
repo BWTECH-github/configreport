@@ -4,6 +4,14 @@ All notable changes to this app will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
+## [0.4.3] - 2026-09-23
+
+### Fixed
+
+- Geheimnisse im Bericht: Bisher wurde nur „password“ geschwärzt; der Marktplatz-Schlüssel (market → key), API-Schlüssel und Token standen im Klartext. Jetzt werden auch secret, token, salt, credential, api-key, private-key und Schlüssel namens „key“ (bzw. _key/-key/.key) entfernt.
+- Download liefert `application/json` statt des nicht registrierten `text/json`.
+- Schaltfläche heißt „Download owncloud.online config report“.
+
 ## [0.4.2] - 2026-08-13
 
 ### Changed

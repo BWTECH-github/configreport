@@ -42,7 +42,7 @@ class ReportResponse extends DownloadResponse {
 		$this->data = $data;
 
 		$fileName = $fileName ? $fileName : 'config_report_' . \date('Ymd') . '.json';
-		$contentType = $contentType ? $contentType : 'text/json';
+		$contentType = $contentType ? $contentType : 'application/json';
 
 		parent::__construct($fileName, $contentType);
 	}

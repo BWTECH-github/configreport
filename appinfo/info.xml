@@ -73,7 +73,7 @@ Modified by BW-Tech GmbH for owncloud.online and PHP 8.4 compatibility.
 </description>
 	<summary>Generate a Config Report</summary>
 	<author>ownCloud contributors, modified by BW-Tech GmbH</author>
-	<version>0.4.2</version>
+	<version>0.4.3</version>
 	<default_enable/>
 	<types>
 		<filesystem/>
