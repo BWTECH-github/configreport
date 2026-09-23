@@ -327,14 +327,25 @@ class ReportDataCollector {
 	 */
 	private function sanitizeValues(array $values): array {
 		foreach ($values as $key => $value) {
-			if (\stripos($key, 'password') !== false) {
-				$values[$key] = IConfig::SENSITIVE_VALUE;
-			}
-			if (\in_array($key, $this->obscuredkeys)) {
+			if (self::isSensitiveKey((string)$key) || \in_array($key, $this->obscuredkeys, true)) {
 				$values[$key] = IConfig::SENSITIVE_VALUE;
 			}
 		}
 		return $values;
+	}
+
+	/**
+	 * Schlüssel, deren Wert ein Geheimnis ist. Vorher wurde nur „password“
+	 * erkannt; der Marktplatz-Schlüssel (market → key), API-Schlüssel und
+	 * Token standen im Klartext im Bericht, obwohl die App „secrets are
+	 * removed“ verspricht (Befund Server-Abnahme 23.09.2026). Erkannt werden
+	 * jetzt password/passwd/pwd, secret, token, salt, credential, api-key,
+	 * private-key sowie ein Schlüssel, der genau „key“ heißt oder auf
+	 * _key/-key/.key endet.
+	 */
+	public static function isSensitiveKey(string $key): bool {
+		return \preg_match('/(password|passwd|pwd|secret|token|salt|credential|api[_-]?key|private[_-]?key)/i', $key) === 1
+			|| \preg_match('/(^|[_.-])key$/i', $key) === 1;
 	}
 
 	private function listAllApps(): array {

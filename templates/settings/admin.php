@@ -27,7 +27,7 @@ script('configreport', 'admin');
 ?>
 <form action="" method="POST" class="section">
     <h2><?php p($l->t('Generate Config Report'));?></h2>
-    <button id="download_config_report"><?php p($l->t('Download ownCloud config report'));?>
+    <button id="download_config_report"><?php p($l->t('Download owncloud.online config report'));?>
         <img class="hidden" src="<?php print_unescaped($_['urlGenerator']->imagePath('core', 'loading.gif')); ?>" alt="" aria-hidden="true" style="width:16px;height:16px">
     </button>
     <input type="hidden" name="sendreport" value="ok">
