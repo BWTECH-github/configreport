@@ -212,6 +212,10 @@ class ReportDataCollector {
 
 			$configuration = $mount->getBackendOptions();
 			$this->hideMountPasswords($mount, $configuration);
+			// Zusätzlich nach Schlüsselnamen schwärzen: Nicht jedes Geheimnis ist
+			// als Passwort-Parameter deklariert (z. B. S3-Zugangsschlüssel "key"
+			// als Text, Optionen von Speichern aus abgeschalteten Apps).
+			$configuration = $this->sanitizeValues($configuration);
 			$mountsArray[] = [
 				'id' => $mount->getId(),
 				'mount_point' => $mount->getMountPoint(),
@@ -235,18 +239,30 @@ class ReportDataCollector {
 		$authParameters = $auth->getParameters();
 
 		foreach ($configArray as $key => $value) {
-			if (
-				(
-					isset($backendParameters[$key]) &&
-					$backendParameters[$key]->getType() === \OCP\Files\External\DefinitionParameter::VALUE_PASSWORD
-				) || (
-					isset($authParameters[$key]) &&
-					$authParameters[$key]->getType() === \OCP\Files\External\DefinitionParameter::VALUE_PASSWORD
-				)
-			) {
+			if (self::isSecretParameter($backendParameters, $key) || self::isSecretParameter($authParameters, $key)) {
 				$configArray[$key] = IConfig::SENSITIVE_VALUE;
 			}
 		}
+	}
+
+	/**
+	 * Passwort- und versteckte Parameter gelten als Geheimnis. Versteckt
+	 * (VALUE_HIDDEN) sind die Werte, die die Anmeldung selbst ablegt - etwa
+	 * das OAuth-Token von Google Drive (Zugriffs- und Aktualisierungstoken)
+	 * oder der private Schlüssel der RSA-Anmeldung bei SFTP. Sie standen
+	 * bisher im Klartext im Bericht.
+	 *
+	 * @param mixed $parameters DefinitionParameter je Schlüssel
+	 * @param int|string $key
+	 * @return bool
+	 */
+	private static function isSecretParameter($parameters, $key): bool {
+		if (!\is_array($parameters) || !isset($parameters[$key])) {
+			return false;
+		}
+		$type = $parameters[$key]->getType();
+		return $type === \OCP\Files\External\DefinitionParameter::VALUE_PASSWORD
+			|| $type === \OCP\Files\External\DefinitionParameter::VALUE_HIDDEN;
 	}
 
 	private function getIntegrityCheckerDetailArray(): array {

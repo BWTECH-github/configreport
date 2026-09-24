@@ -836,4 +836,53 @@ class ReportDataCollectorTest extends TestCase {
 			$this->assertEquals($expectedResult, $result);
 		}
 	}
+
+	/**
+	 * Versteckte Anmeldeparameter (OAuth-Token, privater RSA-Schlüssel) und
+	 * Geheimnisse, die nicht als Passwort deklariert sind (S3-Schlüssel
+	 * "key"), dürfen nicht im Bericht stehen; harmlose Werte bleiben.
+	 */
+	public function testMountsArrayHidesHiddenParametersAndSecretKeys() {
+		$text = $this->createMock(DefinitionParameter::class);
+		$text->method('getType')->willReturn(DefinitionParameter::VALUE_TEXT);
+		$hidden = $this->createMock(DefinitionParameter::class);
+		$hidden->method('getType')->willReturn(DefinitionParameter::VALUE_HIDDEN);
+
+		$backend = $this->createMock(Backend::class);
+		$backend->method('getText')->willReturn('Amazon S3');
+		$backend->method('getParameters')->willReturn(['bucket' => $text, 'key' => $text]);
+		$auth = $this->createMock(AuthMechanism::class);
+		$auth->method('getParameters')->willReturn([
+			'client_id' => $text,
+			'token' => $hidden,
+			'private_key' => $hidden,
+		]);
+
+		$storageConfig = new StorageConfig(5);
+		$storageConfig->setBackend($backend);
+		$storageConfig->setAuthMechanism($auth);
+		$storageConfig->setMountPoint('/Cloud');
+		$storageConfig->setApplicableUsers([]);
+		$storageConfig->setBackendOptions([
+			'bucket' => 'b1',
+			'key' => 'AKIAEXAMPLE',
+			'client_id' => 'cid',
+			'token' => '{"access_token":"ya29.geheim","refresh_token":"1//geheim"}',
+			'private_key' => 'LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQ==',
+			'refresh_secret' => 'nicht deklariert',
+		]);
+
+		$this->globalStoragesService->method('getStorageForAllUsers')
+			->willReturn([$storageConfig]);
+		$results = $this->invokePrivate($this->reportDataCollector, 'getMountsArray', []);
+
+		$this->assertCount(1, $results);
+		$configuration = $results[0]['configuration'];
+		$this->assertSame('b1', $configuration['bucket']);
+		$this->assertSame('cid', $configuration['client_id']);
+		foreach (['key', 'token', 'private_key', 'refresh_secret'] as $key) {
+			$this->assertSame('***REMOVED SENSITIVE VALUE***', $configuration[$key], $key);
+		}
+		$this->assertStringNotContainsString('geheim', \json_encode($results));
+	}
 }
