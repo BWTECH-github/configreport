@@ -54,4 +54,33 @@ class SanitizeValuesTest extends TestCase {
 			self::assertSame(IConfig::SENSITIVE_VALUE, $wert);
 		}
 	}
+
+	/**
+	 * Kernschalter und -verweise, die das Muster trifft, bleiben lesbar;
+	 * echte Geheimnisse daneben nicht.
+	 */
+	public function testCoreSwitchesAndBooleansStay(): void {
+		$ergebnis = $this->bereinige([
+			'token_auth_enforced' => true,
+			'lost_password_link' => 'https://example.org/passwort-vergessen',
+			'Token_Auth_Enforced' => false,
+			'mail_smtppassword' => false,
+			'secret' => 'geheim',
+			'apps_paths' => [['path' => '/x', 'writable' => true]],
+		]);
+		self::assertTrue($ergebnis['token_auth_enforced']);
+		self::assertSame('https://example.org/passwort-vergessen', $ergebnis['lost_password_link']);
+		self::assertFalse($ergebnis['Token_Auth_Enforced']);
+		self::assertFalse($ergebnis['mail_smtppassword']);
+		self::assertSame(IConfig::SENSITIVE_VALUE, $ergebnis['secret']);
+		self::assertTrue($ergebnis['apps_paths'][0]['writable']);
+	}
+
+	public function testIsSensitiveKeyKnowsTheExceptions(): void {
+		self::assertFalse(ReportDataCollector::isSensitiveKey('token_auth_enforced'));
+		self::assertFalse(ReportDataCollector::isSensitiveKey('lost_password_link'));
+		self::assertTrue(ReportDataCollector::isSensitiveKey('token'));
+		self::assertTrue(ReportDataCollector::isSensitiveKey('shared_secret'));
+		self::assertTrue(ReportDataCollector::isSensitiveKey('passwordsalt'));
+	}
 }
