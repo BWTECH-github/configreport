@@ -4,7 +4,9 @@ All notable changes to this app will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
-## [0.4.6] - 2026-10-14
+## [1.0.0] - 2026-10-14
+
+Eigene Versionslinie des Redesign-Zweigs; Inhalt wie 0.4.6.
 
 ### Changed
 
