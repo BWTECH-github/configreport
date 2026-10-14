@@ -212,6 +212,10 @@ class ReportDataCollector {
 
 			$configuration = $mount->getBackendOptions();
 			$this->hideMountPasswords($mount, $configuration);
+			// Zusätzlich nach Schlüsselnamen schwärzen: Nicht jedes Geheimnis ist
+			// als Passwort-Parameter deklariert (z. B. S3-Zugangsschlüssel "key"
+			// als Text, Optionen von Speichern aus abgeschalteten Apps).
+			$configuration = $this->sanitizeValues($configuration);
 			$mountsArray[] = [
 				'id' => $mount->getId(),
 				'mount_point' => $mount->getMountPoint(),
@@ -235,18 +239,30 @@ class ReportDataCollector {
 		$authParameters = $auth->getParameters();
 
 		foreach ($configArray as $key => $value) {
-			if (
-				(
-					isset($backendParameters[$key]) &&
-					$backendParameters[$key]->getType() === \OCP\Files\External\DefinitionParameter::VALUE_PASSWORD
-				) || (
-					isset($authParameters[$key]) &&
-					$authParameters[$key]->getType() === \OCP\Files\External\DefinitionParameter::VALUE_PASSWORD
-				)
-			) {
+			if (self::isSecretParameter($backendParameters, $key) || self::isSecretParameter($authParameters, $key)) {
 				$configArray[$key] = IConfig::SENSITIVE_VALUE;
 			}
 		}
+	}
+
+	/**
+	 * Passwort- und versteckte Parameter gelten als Geheimnis. Versteckt
+	 * (VALUE_HIDDEN) sind die Werte, die die Anmeldung selbst ablegt - etwa
+	 * das OAuth-Token von Google Drive (Zugriffs- und Aktualisierungstoken)
+	 * oder der private Schlüssel der RSA-Anmeldung bei SFTP. Sie standen
+	 * bisher im Klartext im Bericht.
+	 *
+	 * @param mixed $parameters DefinitionParameter je Schlüssel
+	 * @param int|string $key
+	 * @return bool
+	 */
+	private static function isSecretParameter($parameters, $key): bool {
+		if (!\is_array($parameters) || !isset($parameters[$key])) {
+			return false;
+		}
+		$type = $parameters[$key]->getType();
+		return $type === \OCP\Files\External\DefinitionParameter::VALUE_PASSWORD
+			|| $type === \OCP\Files\External\DefinitionParameter::VALUE_HIDDEN;
 	}
 
 	private function getIntegrityCheckerDetailArray(): array {
@@ -333,7 +349,9 @@ class ReportDataCollector {
 			// oder 'objectstore_multibucket' => [...'credentials' => ...], die
 			// die Kernliste SystemConfig::$sensitiveValues nicht kennt
 			// (Gegen-Review 23.09.2026).
-			if (\is_string($key) && (self::isSensitiveKey($key) || \in_array($key, $this->obscuredkeys, true))) {
+			// Ein Wahrheitswert ist nie ein Geheimnis (etwa token_auth_enforced
+			// => true); geschwärzt würde der Support den Schalter nicht sehen.
+			if (\is_string($key) && !\is_bool($value) && (self::isSensitiveKey($key) || \in_array($key, $this->obscuredkeys, true))) {
 				$values[$key] = IConfig::SENSITIVE_VALUE;
 			} elseif (\is_array($value)) {
 				$values[$key] = $this->sanitizeValues($value);
@@ -358,12 +376,25 @@ class ReportDataCollector {
 	 * removed“ verspricht (Befund Server-Abnahme 23.09.2026). Erkannt werden
 	 * jetzt password/passwd/pwd, secret, token, salt, credential, api-key,
 	 * private-key sowie ein Schlüssel, der genau „key“ heißt oder auf
-	 * _key/-key/.key endet.
+	 * _key/-key/.key endet. Ausgenommen sind Kernschlüssel, die das Muster
+	 * trifft, deren Wert aber kein Geheimnis ist (NOT_SENSITIVE_KEYS).
 	 */
 	public static function isSensitiveKey(string $key): bool {
+		if (\in_array(\strtolower($key), self::NOT_SENSITIVE_KEYS, true)) {
+			return false;
+		}
 		return \preg_match('/(password|passwd|pwd|secret|token|salt|credential|api[_-]?key|private[_-]?key)/i', $key) === 1
 			|| \preg_match('/(^|[_.-])key$/i', $key) === 1;
 	}
+
+	/**
+	 * Kernschlüssel mit „token“/„password“ im Namen, die nur einen Schalter
+	 * oder einen Verweis tragen: token_auth_enforced (erzwingt App-Passwörter
+	 * für Clients) und lost_password_link (eigene Seite „Passwort vergessen“).
+	 * Der Support braucht beide, um Anmeldeprobleme einzuordnen
+	 * (Gegen-Review 24.09.2026).
+	 */
+	private const NOT_SENSITIVE_KEYS = ['token_auth_enforced', 'lost_password_link'];
 
 	private function listAllApps(): array {
 		$appManager = \OC::$server->getAppManager();

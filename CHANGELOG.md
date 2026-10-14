@@ -4,6 +4,22 @@ All notable changes to this app will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
+## [0.4.6] - 2026-10-14
+
+### Changed
+
+- Übernahme von main (0.4.5): Schwärzung versteckter Anmeldeparameter externer Speicher und der nicht als Passwort deklarierten Schlüssel; Kernschalter `token_auth_enforced` und `lost_password_link` sowie Wahrheitswerte bleiben lesbar. Einzelheiten unter 0.4.5.
+
+## [0.4.5] - 2026-09-24
+
+### Security
+
+- Externe Speicher im Bericht: Geschwärzt wurden nur Parameter vom Typ Passwort. Versteckte Anmeldeparameter – das OAuth-Token von Google Drive (Zugriffs- und Aktualisierungstoken) und der private Schlüssel der RSA-Anmeldung bei SFTP – sowie Werte, deren Parameter nicht als Passwort deklariert sind (etwa „key“ bei S3 oder alle Werte eines Speichers, dessen App abgeschaltet ist und der deshalb keine Parameterliste hat), standen im Klartext. Jetzt werden versteckte Parameter immer geschwärzt und die Speicherkonfiguration zusätzlich nach Schlüsselnamen geprüft wie die übrigen Konfigurationswerte. Ein neuer Test.
+
+### Fixed
+
+- Über-Schwärzung: Die seit 0.4.3 erweiterte Schlüsselprüfung („token“, „password“) ersetzte auch die Kernschalter `token_auth_enforced` und `lost_password_link` durch den Platzhalter, obwohl beide kein Geheimnis tragen – der Support konnte Client-Anmeldeprobleme nicht mehr einordnen. Beide bleiben jetzt lesbar; Wahrheitswerte (true/false) werden generell nie geschwärzt. Zwei neue Tests.
+
 ## [0.4.4] - 2026-09-23
 
 ### Security
